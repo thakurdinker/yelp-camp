@@ -4,21 +4,9 @@ const router = express.Router({ mergeParams: true });
 const Campground = require("../models/campground");
 const Review = require("../models/review");
 
-const { reviewSchema } = require("../schemas");
-
 const catchAsync = require("../utils/catchAsync");
-const ExpressError = require("../utils/ExpressError");
 
-const isLoggedIn = require("../middleware");
-
-const validateReview = (req, res, next) => {
-  const { error } = reviewSchema.validate(req.body);
-  if (error) {
-    throw new ExpressError(error.message, 400);
-  } else {
-    next();
-  }
-};
+const { isLoggedIn, validateReview, isReviewAuthor } = require("../middleware");
 
 router.post(
   "/",
@@ -29,6 +17,7 @@ router.post(
     const { body, rating } = req.body.review;
     const campground = await Campground.findById(id);
     const review = new Review({ body: body, rating: rating });
+    review.author = req.user._id;
     campground.reviews.push(review);
     await review.save();
     await campground.save();
@@ -40,6 +29,7 @@ router.post(
 router.delete(
   "/:reviewId",
   isLoggedIn,
+  isReviewAuthor,
   catchAsync(async (req, res) => {
     const { id, reviewId } = req.params;
     await Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } }); // Remove the ref of review from campground

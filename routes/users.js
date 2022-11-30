@@ -48,7 +48,10 @@ router.post(
     failureFlash: true,
   }),
   (req, res) => {
-    const redirectUrl = req.signedCookies.returnTo || "/campgrounds";
+    let redirectUrl = req.signedCookies.returnTo || "/campgrounds";
+    // If user is not logged in and submits a review we redirect the login and then back to campground show page
+    if (redirectUrl.includes("reviews"))
+      redirectUrl = redirectUrl.slice(0, redirectUrl.lastIndexOf("/"));
     // Remove the cookie for redirectUrl
     res.clearCookie("returnTo");
     req.flash("success", "Welcome Back");

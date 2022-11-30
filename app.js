@@ -84,7 +84,7 @@ app.use("/campgrounds/:id/reviews", reviewsRouter);
 
 app.all("*", (req, res) => {
   throw new ExpressError("Page not Found", 404);
-});
+});  
 
 app.use((err, req, res, next) => {
   const { statusCode = 500 } = err;
