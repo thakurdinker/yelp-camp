@@ -16,4 +16,12 @@ const reviewSchema = Joi.object({
   }).required(),
 });
 
-module.exports = { campgroundSchema, reviewSchema };
+const userSchema = Joi.object({
+  user: Joi.object({
+    username: Joi.string().required(),
+    email: Joi.string().required(),
+    password: Joi.string().required().min(8).max(20),
+  }).required(),
+});
+
+module.exports = { campgroundSchema, reviewSchema, userSchema };

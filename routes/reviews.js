@@ -9,6 +9,8 @@ const { reviewSchema } = require("../schemas");
 const catchAsync = require("../utils/catchAsync");
 const ExpressError = require("../utils/ExpressError");
 
+const isLoggedIn = require("../middleware");
+
 const validateReview = (req, res, next) => {
   const { error } = reviewSchema.validate(req.body);
   if (error) {
@@ -20,6 +22,7 @@ const validateReview = (req, res, next) => {
 
 router.post(
   "/",
+  isLoggedIn,
   validateReview,
   catchAsync(async (req, res, next) => {
     const { id } = req.params;
@@ -36,6 +39,7 @@ router.post(
 
 router.delete(
   "/:reviewId",
+  isLoggedIn,
   catchAsync(async (req, res) => {
     const { id, reviewId } = req.params;
     await Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } }); // Remove the ref of review from campground
