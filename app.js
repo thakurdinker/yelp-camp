@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV != "production") {
+  require("dotenv").config({ path: "./vars/.env" });
+}
+console.log(process.env.NODE_ENV);
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -84,7 +88,7 @@ app.use("/campgrounds/:id/reviews", reviewsRouter);
 
 app.all("*", (req, res) => {
   throw new ExpressError("Page not Found", 404);
-});  
+});
 
 app.use((err, req, res, next) => {
   const { statusCode = 500 } = err;

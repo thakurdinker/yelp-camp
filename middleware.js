@@ -1,7 +1,7 @@
 const Campground = require("./models/campground");
 const Review = require("./models/review");
 const catchAsync = require("./utils/catchAsync");
-const { campgroundSchema, reviewSchema } = require("./schemas");
+const { campgroundSchema, reviewSchema, userSchema } = require("./schemas");
 const ExpressError = require("./utils/ExpressError");
 
 const isLoggedIn = (req, res, next) => {
@@ -48,6 +48,7 @@ const isReviewAuthor = async (req, res, next) => {
 
 const validateCampground = (req, res, next) => {
   const { error } = campgroundSchema.validate(req.body);
+
   if (error) {
     throw new ExpressError(error.message, 400);
   } else {
@@ -56,7 +57,23 @@ const validateCampground = (req, res, next) => {
 };
 
 const validateReview = (req, res, next) => {
+  const { id } = req.params;
   const { error } = reviewSchema.validate(req.body);
+  if (error) {
+    const { rating } = error._original.review;
+    if (rating && rating === "0") {
+      // zero rating not allowed
+      req.flash("error", "Rating cannot be zero");
+      return res.redirect(`/campgrounds/${id}`);
+    }
+    throw new ExpressError(error.message, 400);
+  } else {
+    next();
+  }
+};
+
+const validateNewUser = (req, res, next) => {
+  const { error } = userSchema.validate(req.body);
   if (error) {
     throw new ExpressError(error.message, 400);
   } else {
@@ -64,4 +81,11 @@ const validateReview = (req, res, next) => {
   }
 };
 
-module.exports = { isLoggedIn, isAuthor, validateCampground, validateReview, isReviewAuthor };
+module.exports = {
+  isLoggedIn,
+  isAuthor,
+  validateCampground,
+  validateReview,
+  isReviewAuthor,
+  validateNewUser,
+};

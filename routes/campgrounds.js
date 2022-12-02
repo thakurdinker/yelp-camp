@@ -1,27 +1,30 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
+const { storage } = require("../cloudinary");
+const upload = multer({ storage });
 
 const Campgrounds = require("../controller/campgroundController");
 const { isLoggedIn, isAuthor, validateCampground } = require("../middleware");
 
-router.get("/", Campgrounds.index);
-
-router.post("/", isLoggedIn, validateCampground, Campgrounds.createCampground);
+router
+  .route("/")
+  .get(Campgrounds.index)
+  .post(
+    isLoggedIn,
+    upload.array("images"),
+    validateCampground,
+    Campgrounds.createCampground
+  );
 
 router.get("/new", isLoggedIn, Campgrounds.renderNewForm);
 
-router.get("/:id", Campgrounds.show);
+router
+  .route("/:id")
+  .get(Campgrounds.show)
+  .put(isLoggedIn, isAuthor, validateCampground, Campgrounds.update)
+  .delete(isLoggedIn, isAuthor, Campgrounds.delete);
 
 router.get("/:id/edit", isLoggedIn, isAuthor, Campgrounds.renderEditForm);
-
-router.put(
-  "/:id",
-  isLoggedIn,
-  isAuthor,
-  validateCampground,
-  Campgrounds.update
-);
-
-router.delete("/:id", isLoggedIn, isAuthor, Campgrounds.delete);
 
 module.exports = router;

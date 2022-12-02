@@ -5,7 +5,6 @@ const campgroundSchema = Joi.object({
     price: Joi.number().required().min(0),
     location: Joi.string().required(),
     description: Joi.string().required(),
-    image: Joi.string().required(),
   }).required(),
 });
 
@@ -24,4 +23,8 @@ const userSchema = Joi.object({
   }).required(),
 });
 
-module.exports = { campgroundSchema, reviewSchema, userSchema };
+module.exports = {
+  campgroundSchema,
+  reviewSchema,
+  userSchema,
+};

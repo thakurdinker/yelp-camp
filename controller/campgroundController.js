@@ -2,6 +2,9 @@ const Campground = require("../models/campground");
 const catchAsync = require("../utils/catchAsync");
 
 module.exports.index = catchAsync(async (req, res, next) => {
+  if (req.signedCookies.returnTo) {
+    res.clearCookie("returnTo");
+  }
   const campgrounds = await Campground.find({});
   res.render("campgrounds/index", { campgrounds, title: "All Campgrounds" });
 });
@@ -10,6 +13,10 @@ module.exports.createCampground = catchAsync(async (req, res, next) => {
   const { campground } = req.body;
   const newCampground = new Campground(campground);
   newCampground.author = req.user._id;
+  newCampground.images = req.files.map((f) => ({
+    url: f.path,
+    filename: f.filename,
+  }));
   await newCampground.save();
   req.flash("success", "Campground Successfully Created");
   res.redirect(`/campgrounds/${newCampground._id}`);
