@@ -22,7 +22,13 @@ router.get("/new", isLoggedIn, Campgrounds.renderNewForm);
 router
   .route("/:id")
   .get(Campgrounds.show)
-  .put(isLoggedIn, isAuthor, validateCampground, Campgrounds.update)
+  .put(
+    isLoggedIn,
+    isAuthor,
+    upload.array("images"),
+    validateCampground,
+    Campgrounds.update
+  )
   .delete(isLoggedIn, isAuthor, Campgrounds.delete);
 
 router.get("/:id/edit", isLoggedIn, isAuthor, Campgrounds.renderEditForm);
