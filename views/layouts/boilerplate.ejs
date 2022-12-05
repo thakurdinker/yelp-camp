@@ -13,10 +13,10 @@
     />
   </head>
   <body class="d-flex flex-column vh-100">
-    <%- include('../partials/navbar.ejs') %> 
+    <%- include('../partials/navbar.ejs') %>
     <main class="container mt-3">
-      <%-include("../partials/flash.ejs") %>
-      <%- body %>
+      <%-include("../partials/modal.ejs") %>
+      <%-include("../partials/flash.ejs")%> <%- body %>
     </main>
     <%- include('../partials/footer.ejs') %>
     <script
@@ -30,5 +30,6 @@
       crossorigin="anonymous"
     ></script>
     <script src="/javascripts/validateForm.js"></script>
+    <script src="/javascripts/maxImages.js"></script>
   </body>
 </html>

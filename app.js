@@ -20,6 +20,7 @@ const userRouter = require("./routes/users");
 const ExpressError = require("./utils/ExpressError");
 
 const User = require("./models/user");
+const multer = require("multer");
 
 const sessionConfig = {
   secret: "thisisnotagreatsecret",
@@ -91,6 +92,12 @@ app.all("*", (req, res) => {
 });
 
 app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    req.flash("error", `${err.message}. Max 3 files are allowed`);
+    const redirectUrl = req.session.returnTo || "/campgrounds";
+    delete req.session["returnTo"];
+    return res.redirect(redirectUrl);
+  }
   const { statusCode = 500 } = err;
   if (!err.message) err.message = "Something went wrong";
   res.status(statusCode).render("error", { err, title: "Error" });

@@ -26,6 +26,14 @@ const CampgroundSchema = new Schema({
   ],
 });
 
+// https://res.cloudinary.com/demo/image/upload/c_scale,w_100/face_top.jpg
+
+CampgroundSchema.virtual("thumbnail").get(function () {
+  return this.images.map(function (img) {
+    return img.url.replace("/upload", "/upload/c_scale,w_100");
+  });
+});
+
 CampgroundSchema.post("findOneAndDelete", async (deletedCampground) => {
   const response = await Review.deleteMany({
     _id: { $in: deletedCampground.reviews },

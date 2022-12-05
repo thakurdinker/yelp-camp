@@ -1,5 +1,6 @@
 const Campground = require("../models/campground");
 const catchAsync = require("../utils/catchAsync");
+const { cloudinary } = require("../cloudinary");
 
 module.exports.index = catchAsync(async (req, res, next) => {
   if (req.signedCookies.returnTo) {
@@ -23,6 +24,7 @@ module.exports.createCampground = catchAsync(async (req, res, next) => {
 });
 
 module.exports.renderNewForm = (req, res) => {
+  req.session.returnTo = req.originalUrl;
   res.render("campgrounds/new", { title: "New Campground" });
 };
 
@@ -55,7 +57,7 @@ module.exports.renderEditForm = catchAsync(async (req, res, next) => {
 
 module.exports.update = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const { campground } = req.body;
+  const { campground, deleteImages } = req.body;
   const updatedCampground = await Campground.findByIdAndUpdate(id, campground, {
     runValidators: true,
     returnDocument: "after",
@@ -66,6 +68,14 @@ module.exports.update = catchAsync(async (req, res, next) => {
   }));
   updatedCampground.images.push(...newImages);
   await updatedCampground.save();
+  if (deleteImages) {
+    for (let filename of deleteImages) {
+      await cloudinary.uploader.destroy(filename);
+    }
+    await updatedCampground.updateOne({
+      $pull: { images: { filename: { $in: deleteImages } } },
+    });
+  }
   req.flash("success", "Campground Updated Successfully");
   res.redirect(`/campgrounds/${updatedCampground._id}`);
 });

@@ -2,7 +2,12 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const { storage } = require("../cloudinary");
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: {
+    files: 3,
+  },
+});
 
 const Campgrounds = require("../controller/campgroundController");
 const { isLoggedIn, isAuthor, validateCampground } = require("../middleware");
