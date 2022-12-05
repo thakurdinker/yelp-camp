@@ -2,6 +2,8 @@ const Campground = require("../models/campground");
 const catchAsync = require("../utils/catchAsync");
 const { cloudinary } = require("../cloudinary");
 
+const { geocoding } = require("../utils/fetchGeoData");
+
 module.exports.index = catchAsync(async (req, res, next) => {
   if (req.signedCookies.returnTo) {
     res.clearCookie("returnTo");
@@ -12,7 +14,13 @@ module.exports.index = catchAsync(async (req, res, next) => {
 
 module.exports.createCampground = catchAsync(async (req, res, next) => {
   const { campground } = req.body;
+  const geometry = await geocoding(campground.location);
+  if (geometry === -1) {
+    req.flash("error", "Invalid Location");
+    return res.redirect("/campgrounds/new");
+  }
   const newCampground = new Campground(campground);
+  newCampground.geometry = geometry;
   newCampground.author = req.user._id;
   newCampground.images = req.files.map((f) => ({
     url: f.path,
