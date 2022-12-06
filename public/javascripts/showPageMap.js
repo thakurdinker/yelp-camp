@@ -6,4 +6,4 @@ L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
 }).addTo(map);
 
 const marker = L.marker([latitude, longitutde]).addTo(map);
-marker.bindPopup(`<b>Lat: ${latitude}</b><br><b>Long: ${longitutde}</b>.`).openPopup();
+marker.bindPopup(`<b>${campgroundTitle}<br/> Lat: ${latitude}<br> Long: ${longitutde}</b>.`).openPopup();

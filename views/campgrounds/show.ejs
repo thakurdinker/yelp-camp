@@ -140,9 +140,13 @@
 </div>
 
 <%if(campground.geometry.coordinates.length > 0) {%>
+  <%- include('../partials/showPageMap.ejs') %>
 <script>
   const latitude = "<%-campground.geometry.coordinates[1]%>";
   const longitutde = "<%-campground.geometry.coordinates[0]%>"
+  const campgroundTitle = "<%-campground.title%>";
   </script>
 <script src="/javascripts/showPageMap.js"></script>
 <%}%>
+
+
