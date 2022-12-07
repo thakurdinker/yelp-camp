@@ -9,7 +9,12 @@ module.exports.index = catchAsync(async (req, res, next) => {
     res.clearCookie("returnTo");
   }
   const campgrounds = await Campground.find({});
-  res.render("campgrounds/index", { campgrounds, title: "All Campgrounds" });
+  const geoData = await Campground.geoJSON();
+  res.render("campgrounds/index", {
+    campgrounds,
+    title: "All Campgrounds",
+    geoData,
+  });
 });
 
 module.exports.createCampground = catchAsync(async (req, res, next) => {

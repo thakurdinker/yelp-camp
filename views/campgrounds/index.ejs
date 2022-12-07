@@ -31,6 +31,7 @@
 
 <%- include('../partials/clusterMap.ejs') %>
 <script>
-  const campgrounds = <%- JSON.stringify(campgrounds) %>;
+  const data = <%- JSON.stringify(geoData)%>;
+  const MAP_TILER_KEY = "<%-process.env.MAP_TILER_KEY%>";
 </script>
 <script src="/javascripts/clusterMap.js"></script>
