@@ -1,6 +1,7 @@
 if (process.env.NODE_ENV != "production") {
   require("dotenv").config({ path: "./vars/.env" });
 }
+
 console.log(process.env.NODE_ENV);
 
 const express = require("express");
@@ -14,6 +15,8 @@ const flash = require("connect-flash");
 const passport = require("passport");
 const cookierParser = require("cookie-parser");
 const LocalStrategy = require("passport-local");
+const mongoSanitize = require("express-mongo-sanitize");
+const helmet = require("helmet");
 
 const campgroundRouter = require("./routes/campgrounds");
 const reviewsRouter = require("./routes/reviews");
@@ -24,15 +27,47 @@ const User = require("./models/user");
 const multer = require("multer");
 
 const sessionConfig = {
+  name: "session",
   secret: "thisisnotagreatsecret",
   resave: false,
   saveUninitialized: true,
   cookie: {
     httpOnly: true,
+    // secure: true,
     expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
     maxAge: 1000 * 60 * 60 * 24 * 7,
   },
 };
+
+const scriptSrcUrls = [
+  "https://unpkg.com/",
+  "https://stackpath.bootstrapcdn.com/",
+  "https://kit.fontawesome.com/",
+  "https://cdnjs.cloudflare.com/",
+  "https://cdn.jsdelivr.net",
+];
+const styleSrcUrls = [
+  "https://unpkg.com/",
+  "https://kit-free.fontawesome.com/",
+  "https://stackpath.bootstrapcdn.com/",
+  "https://fonts.googleapis.com/",
+  "https://use.fontawesome.com/",
+  "https://cdn.jsdelivr.net",
+];
+const connectSrcUrls = [];
+const fontSrcUrls = [];
+
+const imgSrcUrls = [
+  "https://unpkg.com/leaflet@1.3.1/dist/images/",
+  "https://unpkg.com/leaflet@1.3.1/dist/images/",
+  "https://unpkg.com/leaflet@1.9.3/dist/images/",
+  "https://res.cloudinary.com/dlbytbeiw/", //SHOULD MATCH YOUR CLOUDINARY ACCOUNT!
+  "https://images.unsplash.com/",
+  "https://b.tile.osm.org/",
+  "https://c.tile.osm.org/",
+  "https://a.tile.osm.org/",
+  "https://tile.openstreetmap.org/",
+];
 
 mongoose.connect("mongodb://127.0.0.1:27017/yelp-camp", {
   useNewUrlParser: true,
@@ -56,15 +91,34 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(cookierParser("Thisisasignedcookie"));
 app.use(session(sessionConfig));
 app.use(flash());
+app.use(
+  helmet({
+    crossOriginEmbedderPolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: [],
+        connectSrc: ["'self'", ...connectSrcUrls],
+        scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+        styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+        workerSrc: ["'self'", "blob:"],
+        objectSrc: [],
+        imgSrc: ["'self'", "blob:", "data:", ...imgSrcUrls],
+        fontSrc: ["'self'", ...fontSrcUrls],
+      },
+    },
+  })
+);
 
 app.use(passport.initialize());
 app.use(passport.session());
 app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Resource-Policy", "same-site");
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   res.locals.currentUser = req.user;
   next();
 });
+app.use(mongoSanitize());
 
 passport.use(new LocalStrategy(User.authenticate()));
 
@@ -74,7 +128,6 @@ passport.deserializeUser(User.deserializeUser());
 app.get("/", (req, res) => {
   res.render("home");
 });
-
 
 app.use("/", userRouter);
 app.use("/campgrounds", campgroundRouter);
