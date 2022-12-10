@@ -17,6 +17,7 @@ const cookierParser = require("cookie-parser");
 const LocalStrategy = require("passport-local");
 const mongoSanitize = require("express-mongo-sanitize");
 const helmet = require("helmet");
+const MongoDBStore = require("connect-mongo");
 
 const campgroundRouter = require("./routes/campgrounds");
 const reviewsRouter = require("./routes/reviews");
@@ -26,9 +27,26 @@ const ExpressError = require("./utils/ExpressError");
 const User = require("./models/user");
 const multer = require("multer");
 
+const secret = process.env.SECRET || "thisisnotagreatsecret";
+const dbURL = process.env.MONGODB_URL || "mongodb://127.0.0.1:27017/yelp-camp";
+const port = process.env.PORT || 3000;
+
+const store = MongoDBStore.create({
+  mongoUrl: dbURL,
+  touchAfter: 24 * 3600,
+  crypto: {
+    secret: secret,
+  },
+});
+
+store.on("error", function (e) {
+  console.log("SESSION STORE ERROR");
+});
+
 const sessionConfig = {
+  store,
   name: "session",
-  secret: "thisisnotagreatsecret",
+  secret: secret,
   resave: false,
   saveUninitialized: true,
   cookie: {
@@ -69,7 +87,10 @@ const imgSrcUrls = [
   "https://tile.openstreetmap.org/",
 ];
 
-mongoose.connect("mongodb://127.0.0.1:27017/yelp-camp", {
+// process.env.MONGODB_URL
+// "mongodb://127.0.0.1:27017/yelp-camp"
+
+mongoose.connect(dbURL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -149,6 +170,6 @@ app.use((err, req, res, next) => {
   res.status(statusCode).render("error", { err, title: "Error" });
 });
 
-app.listen(3000, () => {
-  console.log("Server started on port 3000");
+app.listen(port, () => {
+  console.log(`Server started on port: ${port} `);
 });
