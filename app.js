@@ -31,6 +31,8 @@ const secret = process.env.SECRET || "thisisnotagreatsecret";
 const dbURL = process.env.MONGODB_URL || "mongodb://127.0.0.1:27017/yelp-camp";
 const port = process.env.PORT || 3000;
 
+console.log("MONGO URL: " + dbURL); 
+
 const store = MongoDBStore.create({
   mongoUrl: dbURL,
   touchAfter: 24 * 3600,
